@@ -2,8 +2,8 @@ import serial
 import time
 import os
 
-ser = serial.Serial('/dev/ttyTHS1', 115200, timeout=0.1)
-
+#ser = serial.Serial('/dev/ttyTHS1', 115200, timeout=0.1)
+ser = serial.Serial('COM12', 115200, timeout=0.1)
 def send_text(message):
     # On s'assure que TXT: est là une seule fois et qu'il y a un \n à la fin
     payload = f"TXT:{message}\n".encode()
@@ -13,7 +13,9 @@ def send_text(message):
 
 def send_image(file_path):
     if not os.path.exists(file_path):
-        print(f"Erreur : {file_path} introuvable")
+        response = f"Erreur : {file_path} introuvable"
+        print(response)
+        send_text(response)
         return
 
     filesize = os.path.getsize(file_path)
