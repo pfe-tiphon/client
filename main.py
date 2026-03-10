@@ -1,10 +1,10 @@
 from jetson_bridge import JetsonBridge
 import time
+import threading
 
 # --- CONFIGURATION ---
-# Utilise '/dev/ttyTHS0' sur Jetson ou 'COMx' sur Windows pour tes tests
-#BRIDGE = JetsonBridge(port='/dev/ttyTHS0', baudrate=115200)
-BRIDGE = JetsonBridge(port='COM12', baudrate=115200)
+#BRIDGE = JetsonBridge(port='/dev/ttyTHS1', baudrate=115200)
+BRIDGE = JetsonBridge(port='COM6', baudrate=115200)
 
 # --- LOGIQUE DES COMMANDES (Extensions faciles) ---
 def cmd_photo():
@@ -22,7 +22,6 @@ def cmd_specs():
     # On envoie les stats ligne par ligne ou en un bloc
     BRIDGE.send_text(stats)
 
-
 COMMANDS = {
     "photo": cmd_photo,
     "status": cmd_status,
@@ -30,7 +29,7 @@ COMMANDS = {
     "specs": cmd_specs
 }
 
-# --- SIMULATION DETECTION BATEAU (Pour ton modèle IA) ---
+# --- SIMULATION DETECTION BATEAU ---
 def on_boat_detected(label, confidence, position):
     """Fonction à appeler par ton modèle IA"""
     timestamp = time.strftime("%H:%M:%S")
@@ -41,23 +40,20 @@ def on_boat_detected(label, confidence, position):
     # 2. Envoyer l'image (capture d'écran de la détection par exemple)
     BRIDGE.send_image("detection_capture.jpg")
 
-# --- BOUCLE PRINCIPALE ---
+BRIDGE.start_background_listener(COMMANDS)
+
 def main():
     print("Système prêt et écoute du port série...")
     try:
         while True:
-            # 1. Vérifier si le PC envoie une commande
-            BRIDGE.check_commands(COMMANDS)
+            # ICI : code de détection IA
             
-            # 2. Emplacement pour ton code de détection IA
-            # Exemple : 
-            # if model.detect(frame) == 'Bateau':
-            #    on_boat_detected("Cargo", 98, "N-45.2 E-5.1")
             
-            time.sleep(0.01) # Évite de saturer le CPU
+            
+            time.sleep(1)
             
     except KeyboardInterrupt:
-        print("Arrêt demandé...")
+        print("Arrêt...")
     finally:
         BRIDGE.close()
 
